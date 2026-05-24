@@ -3,5 +3,18 @@
 	<locale>en</locale>
     <texts>
         <text name="nxfc_gui_format" text="%.0fl Monthly | %.0fl (%s) Remains"/>
+        <text name="nxfc_cond_input_fmt"  text="%.0fl/mo (%s remain)"/>
+        <text name="nxfc_cond_output_fmt" text="%.0fl/mo"/>
+
+        <text name="nxfc_settings_section"   text="NX FeedCalculator"/>
+        <text name="nxfc_settings_mode_title" text="Consumption Scaling"/>
+        <text name="nxfc_settings_mode_desc"  text="How NX scales husbandry inputs (food/water/straw) and outputs (milk/manure/pallets). Vanilla = off, Auto = scale by days/period, Manual = multiplier only, Hybrid = both."/>
+        <text name="nxfc_settings_mult_title" text="Multiplier"/>
+        <text name="nxfc_settings_mult_desc"  text="Extra multiplier applied in Manual or Hybrid mode."/>
+
+        <text name="nxfc_mode_vanilla" text="Vanilla"/>
+        <text name="nxfc_mode_auto"    text="Auto"/>
+        <text name="nxfc_mode_manual"  text="Manual"/>
+        <text name="nxfc_mode_hybrid"  text="Hybrid"/>
     </texts>
 </l10n>

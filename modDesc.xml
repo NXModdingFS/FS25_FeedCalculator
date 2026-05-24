@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8" standalone="no" ?>
 <modDesc descVersion="105">
     <author>NX Modding</author>
-    <version>1.0.0.3</version>
+    <version>1.0.0.4</version>
 
     <title>
         <en>NX FeedCalculator</en>
@@ -13,10 +13,23 @@
         <en>
 <![CDATA[Features:
 - Calculates monthly feed consumption per husbandry and animal breed type
+- Optional consumption scaling: adjust inputs and outputs via in-game settings (Vanilla / Auto / Manual / Hybrid)
+- Shows monthly throughput and time remaining for food, water and straw
+- Shows monthly throughput for milk, manure, slurry and pallet outputs (eggs, wool, etc.)
 - Based on true animal data (age, sub-type, input curves, lactation)
-- Shows monthly consumption and time remaining in the Animals Menu
 - Compatible with vanilla FS25 animals and Enhanced Animal Systems mod
-- Multiplayer safe with automatic recalculation for animal changes
+- Multiplayer safe with automatic recalculation and settings sync
+
+Changelog v1.0.0.4:
+- NEW: In-game settings menu (Settings → Game) with Vanilla / Auto / Manual / Hybrid scaling and 0.25x - 10x multiplier
+- NEW: Server-side scaling hooks for husbandry food, water, straw, milk, manure, slurry and pallet outputs
+- NEW: Settings persist per-savegame and sync to clients in multiplayer
+- NEW: Conditions panel now shows monthly throughput per row; water and straw also show time remaining
+- IMPROVED: EAS lactation factor read per-month from subType.lactation table (more accurate than cluster.lactationFactor)
+- IMPROVED: EAS detection re-evaluated at runtime instead of at file load
+- IMPROVED: Uses live daysPerPeriod from environment instead of planned value
+- IMPROVED: Reads cluster getters first (compatible with RealisticLivestock and similar mods)
+- FIXED: Debug log spam disabled by default (gated behind a debug flag)
 
 Changelog v1.0.0.3:
 - Improved compatibility with third-party animal mods
@@ -32,10 +45,23 @@ GitHub: https://github.com/NXModding/FS25_NXFeedCalculator
         <de>
 <![CDATA[Funktionen:
 - Berechnet den monatlichen Futterverbrauch pro Tierhaltung und Rassetyp
+- Optionale Verbrauchs-Skalierung: In- und Outputs über das In-Game-Menü anpassen (Vanilla / Auto / Manuell / Hybrid)
+- Zeigt monatlichen Durchsatz und verbleibende Zeit für Futter, Wasser und Stroh
+- Zeigt monatlichen Durchsatz für Milch, Mist, Gülle und Paletten-Outputs (Eier, Wolle usw.)
 - Basiert auf echten Tierdaten (Alter, Untertyp, Input-Kurven, Laktation)
-- Zeigt Verbrauch und verbleibende Zeit im Tiermenü an
 - Kompatibel mit Vanilla-Tieren und Enhanced Animal Systems
-- Multiplayer-kompatibel mit automatischer Neuberechnung bei Tieränderungen
+- Multiplayer-kompatibel mit automatischer Neuberechnung und Einstellungs-Synchronisation
+
+Changelog v1.0.0.4:
+- NEU: In-Game-Einstellungsmenü (Einstellungen → Spiel) mit Modi Vanilla / Auto / Manuell / Hybrid und Multiplikator 0,25x - 10x
+- NEU: Server-seitige Skalierung für Futter, Wasser, Stroh, Milch, Mist, Gülle und Paletten-Outputs
+- NEU: Einstellungen werden pro Spielstand gespeichert und mit Clients im Multiplayer synchronisiert
+- NEU: Bedingungs-Panel zeigt nun monatlichen Durchsatz pro Zeile; Wasser und Stroh auch mit verbleibender Zeit
+- VERBESSERT: EAS-Laktationsfaktor wird pro Monat aus subType.lactation-Tabelle gelesen (genauer als cluster.lactationFactor)
+- VERBESSERT: EAS-Erkennung zur Laufzeit statt beim Datei-Laden
+- VERBESSERT: Nutzt aktive daysPerPeriod aus der Umgebung statt geplanten Wert
+- VERBESSERT: Bevorzugt Cluster-Getter (kompatibel mit RealisticLivestock und ähnlichen Mods)
+- KORRIGIERT: Debug-Log-Spam standardmäßig deaktiviert (hinter Debug-Flag)
 
 Changelog v1.0.0.3:
 - Verbesserte Kompatibilität mit Tiermods von Drittanbietern
@@ -51,10 +77,23 @@ GitHub: https://github.com/NXModding/FS25_NXFeedCalculator
         <fr>
 <![CDATA[Caractéristiques :
 - Calcule la consommation mensuelle par exploitation et type de race
+- Mise à l'échelle optionnelle de la consommation : ajuster entrées et sorties via les paramètres en jeu (Vanilla / Auto / Manuel / Hybride)
+- Affiche le débit mensuel et le temps restant pour la nourriture, l'eau et la paille
+- Affiche le débit mensuel pour le lait, le fumier, le lisier et les sorties palettes (œufs, laine, etc.)
 - Basé sur de vraies données d'élevage (âge, sous-type, courbes, lactation)
-- Affiche consommation et temps restant dans le menu Animaux
 - Compatible avec les animaux vanilla et Enhanced Animal Systems
-- Compatible multijoueur avec recalcul automatique
+- Compatible multijoueur avec recalcul automatique et synchronisation des paramètres
+
+Changelog v1.0.0.4:
+- NOUVEAU : Menu paramètres en jeu (Paramètres → Jeu) avec modes Vanilla / Auto / Manuel / Hybride et multiplicateur 0,25x - 10x
+- NOUVEAU : Hooks serveur pour nourriture, eau, paille, lait, fumier, lisier et palettes d'élevage
+- NOUVEAU : Paramètres sauvegardés par partie et synchronisés avec les clients en multijoueur
+- NOUVEAU : Panneau Conditions affiche le débit mensuel par ligne ; eau et paille affichent aussi le temps restant
+- AMÉLIORÉ : Facteur de lactation EAS lu mois par mois depuis la table subType.lactation (plus précis que cluster.lactationFactor)
+- AMÉLIORÉ : Détection EAS réévaluée à l'exécution au lieu du chargement du fichier
+- AMÉLIORÉ : Utilise daysPerPeriod actif de l'environnement au lieu de la valeur planifiée
+- AMÉLIORÉ : Lit d'abord les getters de cluster (compatible avec RealisticLivestock et mods similaires)
+- CORRIGÉ : Spam de logs debug désactivé par défaut (derrière un flag debug)
 
 Changelog v1.0.0.3:
 - Amélioration de la compatibilité avec les mods d'animaux tiers

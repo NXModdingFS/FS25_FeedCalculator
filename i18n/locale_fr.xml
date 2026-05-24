@@ -3,5 +3,18 @@
     <locale>fr</locale>
     <texts>
         <text name="nxfc_gui_format" text="%.0fl Mensuel | %.0fl (%s) Restant"/>
+        <text name="nxfc_cond_input_fmt"  text="%.0fl/mois (%s restant)"/>
+        <text name="nxfc_cond_output_fmt" text="%.0fl/mois"/>
+
+        <text name="nxfc_settings_section"   text="NX Calculateur d'Alimentation"/>
+        <text name="nxfc_settings_mode_title" text="Mise à l'échelle de la consommation"/>
+        <text name="nxfc_settings_mode_desc"  text="Comment NX met à l'échelle les entrées (nourriture/eau/paille) et sorties (lait/fumier/palettes). Vanilla = désactivé, Auto = jours/période, Manuel = multiplicateur seul, Hybride = les deux."/>
+        <text name="nxfc_settings_mult_title" text="Multiplicateur"/>
+        <text name="nxfc_settings_mult_desc"  text="Multiplicateur supplémentaire utilisé en mode Manuel ou Hybride."/>
+
+        <text name="nxfc_mode_vanilla" text="Vanilla"/>
+        <text name="nxfc_mode_auto"    text="Auto"/>
+        <text name="nxfc_mode_manual"  text="Manuel"/>
+        <text name="nxfc_mode_hybrid"  text="Hybride"/>
     </texts>
 </l10n>
