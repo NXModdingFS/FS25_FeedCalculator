@@ -1,20 +1,34 @@
 <?xml version="1.0" encoding="utf-8" standalone="no" ?>
 <l10n>
-	<locale>en</locale>
+    <locale>en</locale>
     <texts>
-        <text name="nxfc_gui_format" text="%.0fl Monthly | %.0fl (%s) Remains"/>
-        <text name="nxfc_cond_input_fmt"  text="%.0fl/mo (%s remain)"/>
-        <text name="nxfc_cond_output_fmt" text="%.0fl/mo"/>
+        <!-- Row separator used when appending to an existing menu row -->
+        <text name="nxhm_join" text=" | "/>
 
-        <text name="nxfc_settings_section"   text="NX FeedCalculator"/>
-        <text name="nxfc_settings_mode_title" text="Consumption Scaling"/>
-        <text name="nxfc_settings_mode_desc"  text="How NX scales husbandry inputs (food/water/straw) and outputs (milk/manure/pallets). Vanilla = off, Auto = scale by days/period, Manual = multiplier only, Hybrid = both."/>
-        <text name="nxfc_settings_mult_title" text="Multiplier"/>
-        <text name="nxfc_settings_mult_desc"  text="Extra multiplier applied in Manual or Hybrid mode."/>
+        <!-- Feed row in the husbandry panel -->
+        <text name="nxhm_feed_line" text="%s/mo | %s | %s left"/>
 
-        <text name="nxfc_mode_vanilla" text="Vanilla"/>
-        <text name="nxfc_mode_auto"    text="Auto"/>
-        <text name="nxfc_mode_manual"  text="Manual"/>
-        <text name="nxfc_mode_hybrid"  text="Hybrid"/>
+        <!-- Condition rows -->
+        <text name="nxhm_row_intake" text="%s/mo | %s left"/>
+        <text name="nxhm_row_graze" text="%s/mo | %s left"/>
+        <text name="nxhm_row_yield"  text="%s/mo"/>
+
+        <!-- Time remaining -->
+        <text name="nxhm_span_both"     text="%dm %dd"/>
+        <text name="nxhm_span_months"   text="%dm"/>
+        <text name="nxhm_span_days"     text="%dd"/>
+        <text name="nxhm_span_fraction" text="%.1fm"/>
+        <text name="nxhm_span_trace"    text="&lt;1d"/>
+        <text name="nxhm_span_empty"    text="empty"/>
+
+        <!-- Settings -->
+        <text name="nxhm_opt_section"     text="NX FeedCalculator"/>
+        <text name="nxhm_opt_season"      text="Scale feed use to month length"/>
+        <text name="nxhm_opt_season_help" text="Multiplies husbandry throughput by the number of days in an in-game month, so a longer month costs proportionally more feed, water and bedding."/>
+        <text name="nxhm_opt_trim"        text="Feed use multiplier"/>
+        <text name="nxhm_opt_trim_help"   text="A straight multiplier on husbandry feed, water, bedding and produce. Applies on top of month length scaling."/>
+
+        <text name="nxhm_toggle_off" text="Off"/>
+        <text name="nxhm_toggle_on"  text="On"/>
     </texts>
 </l10n>

@@ -2,19 +2,28 @@
 <l10n>
     <locale>de</locale>
     <texts>
-        <text name="nxfc_gui_format" text="%.0fl Monatlich | %.0fl (%s) Verbleibend"/>
-        <text name="nxfc_cond_input_fmt"  text="%.0fl/Monat (%s übrig)"/>
-        <text name="nxfc_cond_output_fmt" text="%.0fl/Monat"/>
+        <text name="nxhm_join" text=" | "/>
 
-        <text name="nxfc_settings_section"   text="NX FutterRechner"/>
-        <text name="nxfc_settings_mode_title" text="Verbrauchs-Skalierung"/>
-        <text name="nxfc_settings_mode_desc"  text="Wie NX Stall-Inputs (Futter/Wasser/Stroh) und Outputs (Milch/Mist/Paletten) skaliert. Vanilla = aus, Auto = nach Tagen pro Periode, Manual = nur Multiplikator, Hybrid = beides."/>
-        <text name="nxfc_settings_mult_title" text="Multiplikator"/>
-        <text name="nxfc_settings_mult_desc"  text="Zusätzlicher Multiplikator, aktiv in Manual und Hybrid."/>
+        <text name="nxhm_feed_line" text="%s/Mon | %s | %s übrig"/>
 
-        <text name="nxfc_mode_vanilla" text="Vanilla"/>
-        <text name="nxfc_mode_auto"    text="Auto"/>
-        <text name="nxfc_mode_manual"  text="Manuell"/>
-        <text name="nxfc_mode_hybrid"  text="Hybrid"/>
+        <text name="nxhm_row_intake" text="%s/Mon | %s übrig"/>
+        <text name="nxhm_row_graze" text="%s/Mon | %s übrig"/>
+        <text name="nxhm_row_yield"  text="%s/Mon"/>
+
+        <text name="nxhm_span_both"     text="%dM %dT"/>
+        <text name="nxhm_span_months"   text="%dM"/>
+        <text name="nxhm_span_days"     text="%dT"/>
+        <text name="nxhm_span_fraction" text="%.1fM"/>
+        <text name="nxhm_span_trace"    text="&lt;1T"/>
+        <text name="nxhm_span_empty"    text="leer"/>
+
+        <text name="nxhm_opt_section"     text="NX FutterRechner"/>
+        <text name="nxhm_opt_season"      text="Verbrauch an Monatslänge koppeln"/>
+        <text name="nxhm_opt_season_help" text="Multipliziert den Stallverbrauch mit der Anzahl Tage eines Spielmonats. Ein längerer Monat kostet damit anteilig mehr Futter, Wasser und Einstreu."/>
+        <text name="nxhm_opt_trim"        text="Verbrauchsmultiplikator"/>
+        <text name="nxhm_opt_trim_help"   text="Direkter Multiplikator auf Futter, Wasser, Einstreu und Erzeugnisse des Stalls. Wirkt zusätzlich zur Kopplung an die Monatslänge."/>
+
+        <text name="nxhm_toggle_off" text="Aus"/>
+        <text name="nxhm_toggle_on"  text="An"/>
     </texts>
 </l10n>

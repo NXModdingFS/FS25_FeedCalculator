@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8" standalone="no" ?>
 <modDesc descVersion="105">
     <author>NX Modding</author>
-    <version>1.0.0.4</version>
+    <version>1.0.0.5</version>
 
     <title>
         <en>NX FeedCalculator</en>
@@ -11,17 +11,32 @@
 
     <description>
         <en>
-<![CDATA[Features:
-- Calculates monthly feed consumption per husbandry and animal breed type
-- Optional consumption scaling: adjust inputs and outputs via in-game settings (Vanilla / Auto / Manual / Hybrid)
-- Shows monthly throughput and time remaining for food, water and straw
-- Shows monthly throughput for milk, manure, slurry and pallet outputs (eggs, wool, etc.)
-- Based on true animal data (age, sub-type, input curves, lactation)
-- Compatible with vanilla FS25 animals and Enhanced Animal Systems mod
-- Multiplayer safe with automatic recalculation and settings sync
+<![CDATA[Shows what your animals actually eat, and how long what you have will last.
+
+Features:
+- Monthly feed, water and bedding demand per husbandry, read from the real per-animal age curves
+- Time remaining for feed, water and bedding, shown directly on the husbandry rows
+- Meadow grass is measured too: see how long the standing grass on a pasture will carry the herd
+- Monthly output figures for milk, manure, slurry and pallet goods (eggs, wool and so on)
+- Optional consumption scaling: tie husbandry throughput to the length of an in-game month, apply a flat multiplier, or both
+- Settings live in Settings > Game, save per savegame and sync to clients in multiplayer
+- Works with vanilla FS25 animals and with extended animal mods that add lactation curves
+
+Changelog v1.0.0.5:
+- NEW: Meadow grass support. Barns with a pasture now show grazing demand and how long the standing grass will last
+- NEW: Feed row splits stored feed into trough and pasture so you can see where the cover is coming from
+- NEW: Console command nxFeedReport prints demand and grazing cover for every husbandry
+- CHANGED: The mod has been rebuilt from the ground up on a new internal structure
+- CHANGED: The scaling setting is now two independent controls, "Scale feed use to month length" and "Feed use multiplier", replacing the old four mode selector. Existing savegame settings are converted automatically on first load
+- IMPROVED: Condition rows are matched by the data the game itself attaches to them rather than by their translated captions, so every row is recognised in any language
+- IMPROVED: Feed on hand is read through the animal food system, which correctly includes pasture stock and third party storage
+- IMPROVED: Throughput scaling no longer reimplements the game's feeding logic; it adjusts the rate the stock code reads and restores it afterwards
+- FIXED: Feed, water, bedding and produce figures were out by the number of days in a month. The game's animal curves are litres per day, not per month, so monthly totals are now the daily rate multiplied by the month length
+- FIXED: Time remaining is truncated rather than rounded up, so a part day of feed is no longer reported as a full month
+- FIXED: Menu errors can no longer propagate out of the husbandry panel
 
 Changelog v1.0.0.4:
-- NEW: In-game settings menu (Settings → Game) with Vanilla / Auto / Manual / Hybrid scaling and 0.25x - 10x multiplier
+- NEW: In-game settings menu (Settings -> Game) with Vanilla / Auto / Manual / Hybrid scaling and 0.25x - 10x multiplier
 - NEW: Server-side scaling hooks for husbandry food, water, straw, milk, manure, slurry and pallet outputs
 - NEW: Settings persist per-savegame and sync to clients in multiplayer
 - NEW: Conditions panel now shows monthly throughput per row; water and straw also show time remaining
@@ -43,17 +58,32 @@ GitHub: https://github.com/NXModding/FS25_NXFeedCalculator
         </en>
 
         <de>
-<![CDATA[Funktionen:
-- Berechnet den monatlichen Futterverbrauch pro Tierhaltung und Rassetyp
-- Optionale Verbrauchs-Skalierung: In- und Outputs über das In-Game-Menü anpassen (Vanilla / Auto / Manuell / Hybrid)
-- Zeigt monatlichen Durchsatz und verbleibende Zeit für Futter, Wasser und Stroh
-- Zeigt monatlichen Durchsatz für Milch, Mist, Gülle und Paletten-Outputs (Eier, Wolle usw.)
-- Basiert auf echten Tierdaten (Alter, Untertyp, Input-Kurven, Laktation)
-- Kompatibel mit Vanilla-Tieren und Enhanced Animal Systems
-- Multiplayer-kompatibel mit automatischer Neuberechnung und Einstellungs-Synchronisation
+<![CDATA[Zeigt, was deine Tiere tatsächlich fressen und wie lange dein Vorrat reicht.
+
+Funktionen:
+- Monatlicher Bedarf an Futter, Wasser und Einstreu pro Stall, aus den echten Alterskurven der Tiere gelesen
+- Restlaufzeit für Futter, Wasser und Einstreu direkt in den Stallzeilen
+- Auch Weidegras wird erfasst: sieh, wie lange das stehende Gras einer Weide die Herde trägt
+- Monatswerte für Milch, Mist, Gülle und Palettenwaren (Eier, Wolle und so weiter)
+- Optionale Verbrauchsskalierung: an die Länge eines Spielmonats koppeln, festen Multiplikator anwenden oder beides
+- Einstellungen unter Einstellungen > Spiel, pro Speicherstand gesichert und im Mehrspieler synchronisiert
+- Funktioniert mit den FS25 Standardtieren und mit erweiterten Tiermods, die Laktationskurven mitbringen
+
+Changelog v1.0.0.5:
+- NEU: Unterstützung für Weidegras. Ställe mit Weide zeigen jetzt den Weidebedarf und die Reichweite des stehenden Grases
+- NEU: Die Futterzeile trennt den Vorrat in Trog und Weide, damit erkennbar ist, woher die Deckung kommt
+- NEU: Konsolenbefehl nxFeedReport gibt Bedarf und Weidedeckung für jeden Stall aus
+- GEÄNDERT: Der Mod wurde vollständig auf einer neuen internen Struktur neu aufgebaut
+- GEÄNDERT: Die Skalierung besteht jetzt aus zwei eigenständigen Optionen, "Verbrauch an Monatslänge koppeln" und "Verbrauchsmultiplikator", statt der bisherigen Modusauswahl. Vorhandene Einstellungen werden beim ersten Laden automatisch übernommen
+- VERBESSERT: Zustandszeilen werden über die Daten erkannt, die das Spiel selbst anhängt, statt über übersetzte Beschriftungen. Damit funktioniert die Erkennung in jeder Sprache
+- VERBESSERT: Der Vorrat wird über das Tierfuttersystem gelesen und enthält damit korrekt auch Weidebestand und Lager von Drittanbietern
+- VERBESSERT: Die Skalierung bildet die Fütterungslogik des Spiels nicht mehr nach, sondern passt die gelesene Rate an und stellt sie danach wieder her
+- BEHOBEN: Werte für Futter, Wasser, Einstreu und Erzeugnisse waren um die Anzahl der Tage eines Monats falsch. Die Tierkurven des Spiels sind Liter pro Tag, nicht pro Monat; Monatswerte ergeben sich jetzt aus der Tagesrate mal der Monatslänge
+- BEHOBEN: Die Restlaufzeit wird abgeschnitten statt aufgerundet, ein Teiltag Futter wird nicht mehr als ganzer Monat angezeigt
+- BEHOBEN: Fehler in der Menüanzeige können den Stalldialog nicht mehr verlassen
 
 Changelog v1.0.0.4:
-- NEU: In-Game-Einstellungsmenü (Einstellungen → Spiel) mit Modi Vanilla / Auto / Manuell / Hybrid und Multiplikator 0,25x - 10x
+- NEU: In-Game-Einstellungsmenü (Einstellungen -> Spiel) mit Modi Vanilla / Auto / Manuell / Hybrid und Multiplikator 0,25x - 10x
 - NEU: Server-seitige Skalierung für Futter, Wasser, Stroh, Milch, Mist, Gülle und Paletten-Outputs
 - NEU: Einstellungen werden pro Spielstand gespeichert und mit Clients im Multiplayer synchronisiert
 - NEU: Bedingungs-Panel zeigt nun monatlichen Durchsatz pro Zeile; Wasser und Stroh auch mit verbleibender Zeit
@@ -75,17 +105,32 @@ GitHub: https://github.com/NXModding/FS25_NXFeedCalculator
         </de>
 
         <fr>
-<![CDATA[Caractéristiques :
-- Calcule la consommation mensuelle par exploitation et type de race
-- Mise à l'échelle optionnelle de la consommation : ajuster entrées et sorties via les paramètres en jeu (Vanilla / Auto / Manuel / Hybride)
-- Affiche le débit mensuel et le temps restant pour la nourriture, l'eau et la paille
-- Affiche le débit mensuel pour le lait, le fumier, le lisier et les sorties palettes (œufs, laine, etc.)
-- Basé sur de vraies données d'élevage (âge, sous-type, courbes, lactation)
-- Compatible avec les animaux vanilla et Enhanced Animal Systems
-- Compatible multijoueur avec recalcul automatique et synchronisation des paramètres
+<![CDATA[Montre ce que vos animaux consomment réellement et combien de temps vos stocks tiendront.
+
+Fonctions :
+- Besoins mensuels en nourriture, eau et litière par élevage, lus sur les vraies courbes par âge
+- Temps restant pour la nourriture, l'eau et la litière, affiché directement sur les lignes de l'élevage
+- L'herbe de pâture est prise en compte : voyez combien de temps l'herbe sur pied nourrira le troupeau
+- Valeurs mensuelles de lait, fumier, lisier et marchandises sur palette (œufs, laine, etc.)
+- Mise à l'échelle optionnelle : lier la consommation à la durée d'un mois de jeu, appliquer un multiplicateur, ou les deux
+- Réglages dans Paramètres > Jeu, sauvegardés par partie et synchronisés en multijoueur
+- Compatible avec les animaux FS25 d'origine et avec les mods d'animaux étendus fournissant des courbes de lactation
+
+Changelog v1.0.0.5 :
+- NOUVEAU : Prise en charge de l'herbe de pâture. Les élevages avec pâture affichent le besoin au pâturage et l'autonomie de l'herbe sur pied
+- NOUVEAU : La ligne d'alimentation sépare le stock entre auge et pâture pour montrer d'où vient la couverture
+- NOUVEAU : Commande console nxFeedReport, qui affiche besoins et couverture au pâturage pour chaque élevage
+- MODIFIÉ : Le mod a été entièrement reconstruit sur une nouvelle structure interne
+- MODIFIÉ : La mise à l'échelle repose désormais sur deux réglages indépendants, « Lier la consommation à la durée du mois » et « Multiplicateur de consommation », à la place de l'ancien sélecteur de mode. Les réglages existants sont convertis au premier chargement
+- AMÉLIORÉ : Les lignes de conditions sont reconnues via les données attachées par le jeu lui-même plutôt que par leurs libellés traduits, donc dans toutes les langues
+- AMÉLIORÉ : Le stock est lu via le système d'alimentation animale, ce qui inclut correctement la pâture et les stockages tiers
+- AMÉLIORÉ : La mise à l'échelle ne réimplémente plus la logique d'alimentation du jeu ; elle ajuste le débit lu puis le restaure
+- CORRIGÉ : Les valeurs de nourriture, eau, litière et production étaient fausses du nombre de jours d'un mois. Les courbes animales du jeu sont en litres par jour, pas par mois ; les totaux mensuels sont désormais le débit journalier multiplié par la durée du mois
+- CORRIGÉ : Le temps restant est tronqué au lieu d'être arrondi vers le haut, une fraction de jour n'est plus annoncée comme un mois entier
+- CORRIGÉ : Une erreur d'affichage ne peut plus se propager hors du panneau d'élevage
 
 Changelog v1.0.0.4:
-- NOUVEAU : Menu paramètres en jeu (Paramètres → Jeu) avec modes Vanilla / Auto / Manuel / Hybride et multiplicateur 0,25x - 10x
+- NOUVEAU : Menu paramètres en jeu (Paramètres -> Jeu) avec modes Vanilla / Auto / Manuel / Hybride et multiplicateur 0,25x - 10x
 - NOUVEAU : Hooks serveur pour nourriture, eau, paille, lait, fumier, lisier et palettes d'élevage
 - NOUVEAU : Paramètres sauvegardés par partie et synchronisés avec les clients en multijoueur
 - NOUVEAU : Panneau Conditions affiche le débit mensuel par ligne ; eau et paille affichent aussi le temps restant
@@ -112,6 +157,6 @@ GitHub: https://github.com/NXModding/FS25_NXFeedCalculator
     <multiplayer supported="true"/>
 
     <extraSourceFiles>
-        <sourceFile filename="NXFeedCalc.lua"/>
+        <sourceFile filename="NXHerdMeter.lua"/>
     </extraSourceFiles>
 </modDesc>

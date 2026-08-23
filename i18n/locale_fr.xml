@@ -2,19 +2,28 @@
 <l10n>
     <locale>fr</locale>
     <texts>
-        <text name="nxfc_gui_format" text="%.0fl Mensuel | %.0fl (%s) Restant"/>
-        <text name="nxfc_cond_input_fmt"  text="%.0fl/mois (%s restant)"/>
-        <text name="nxfc_cond_output_fmt" text="%.0fl/mois"/>
+        <text name="nxhm_join" text=" | "/>
 
-        <text name="nxfc_settings_section"   text="NX Calculateur d'Alimentation"/>
-        <text name="nxfc_settings_mode_title" text="Mise à l'échelle de la consommation"/>
-        <text name="nxfc_settings_mode_desc"  text="Comment NX met à l'échelle les entrées (nourriture/eau/paille) et sorties (lait/fumier/palettes). Vanilla = désactivé, Auto = jours/période, Manuel = multiplicateur seul, Hybride = les deux."/>
-        <text name="nxfc_settings_mult_title" text="Multiplicateur"/>
-        <text name="nxfc_settings_mult_desc"  text="Multiplicateur supplémentaire utilisé en mode Manuel ou Hybride."/>
+        <text name="nxhm_feed_line" text="%s/mois | %s | %s restant"/>
 
-        <text name="nxfc_mode_vanilla" text="Vanilla"/>
-        <text name="nxfc_mode_auto"    text="Auto"/>
-        <text name="nxfc_mode_manual"  text="Manuel"/>
-        <text name="nxfc_mode_hybrid"  text="Hybride"/>
+        <text name="nxhm_row_intake" text="%s/mois | %s restant"/>
+        <text name="nxhm_row_graze" text="%s/mois | %s restant"/>
+        <text name="nxhm_row_yield"  text="%s/mois"/>
+
+        <text name="nxhm_span_both"     text="%dm %dj"/>
+        <text name="nxhm_span_months"   text="%dm"/>
+        <text name="nxhm_span_days"     text="%dj"/>
+        <text name="nxhm_span_fraction" text="%.1fm"/>
+        <text name="nxhm_span_trace"    text="&lt;1j"/>
+        <text name="nxhm_span_empty"    text="vide"/>
+
+        <text name="nxhm_opt_section"     text="NX Calculateur d'Alimentation"/>
+        <text name="nxhm_opt_season"      text="Lier la consommation à la durée du mois"/>
+        <text name="nxhm_opt_season_help" text="Multiplie la consommation de l'élevage par le nombre de jours d'un mois de jeu. Un mois plus long coûte donc proportionnellement plus de nourriture, d'eau et de litière."/>
+        <text name="nxhm_opt_trim"        text="Multiplicateur de consommation"/>
+        <text name="nxhm_opt_trim_help"   text="Multiplicateur direct sur la nourriture, l'eau, la litière et la production de l'élevage. S'applique en plus de la liaison à la durée du mois."/>
+
+        <text name="nxhm_toggle_off" text="Désactivé"/>
+        <text name="nxhm_toggle_on"  text="Activé"/>
     </texts>
 </l10n>
