@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8" standalone="no" ?>
 <modDesc descVersion="113">
     <author>NX Modding</author>
-    <version>1.0.0.5</version>
+    <version>1.0.0.6</version>
 
     <title>
         <en>Feed Calculator</en>
@@ -26,7 +26,7 @@ Features:
 - Settings live in Settings > Game, save per savegame and sync to clients in multiplayer
 - Works with vanilla FS25 animals and with extended animal mods that add lactation curves
 
-Changelog v1.0.0.5:
+Changelog v1.0.0.6:
 - NEW: Meadow grass support. Barns with a pasture now show grazing demand and how long the standing grass will last
 - NEW: Feed row splits stored feed into trough and pasture so you can see where the cover is coming from
 - NEW: Console command nxFeedReport prints demand and grazing cover for every husbandry
@@ -80,7 +80,7 @@ Funktionen:
 - Einstellungen unter Einstellungen > Spiel, pro Speicherstand gesichert und im Mehrspieler synchronisiert
 - Funktioniert mit den FS25 Standardtieren und mit erweiterten Tiermods, die Laktationskurven mitbringen
 
-Changelog v1.0.0.5:
+Changelog v1.0.0.6:
 - NEU: Unterstützung für Weidegras. Ställe mit Weide zeigen jetzt den Weidebedarf und die Reichweite des stehenden Grases
 - NEU: Die Futterzeile trennt den Vorrat in Trog und Weide, damit erkennbar ist, woher die Deckung kommt
 - NEU: Konsolenbefehl nxFeedReport gibt Bedarf und Weidedeckung für jeden Stall aus
@@ -134,7 +134,7 @@ Fonctions :
 - Réglages dans Paramètres > Jeu, sauvegardés par partie et synchronisés en multijoueur
 - Compatible avec les animaux FS25 d'origine et avec les mods d'animaux étendus fournissant des courbes de lactation
 
-Changelog v1.0.0.5 :
+Changelog v1.0.0.6 :
 - NOUVEAU : Prise en charge de l'herbe de pâture. Les élevages avec pâture affichent le besoin au pâturage et l'autonomie de l'herbe sur pied
 - NOUVEAU : La ligne d'alimentation sépare le stock entre auge et pâture pour montrer d'où vient la couverture
 - NOUVEAU : Commande console nxFeedReport, qui affiche besoins et couverture au pâturage pour chaque élevage
