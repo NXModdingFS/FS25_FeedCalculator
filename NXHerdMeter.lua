@@ -155,12 +155,6 @@ function NXHerdMeter.consoleReport()
             report.rateSource.straw or "?", report.rateSource.yields or "?",
             report.intensity or 1)
 
-        -- When the husbandry publishes a rate, show what the curves alone would
-        -- have said. A wide gap means an animal mod is changing intake.
-        local enginePerHour = Stores.engineFoodPerHour(placeable)
-        if enginePerHour == nil or enginePerHour <= 0 then
-            lines[#lines + 1] = "        food spec: " .. Stores.describeFoodSpec(placeable)
-        end
 
         if Stores.hasPasture(placeable) then
             local quality = Stores.pastureQuality(placeable)

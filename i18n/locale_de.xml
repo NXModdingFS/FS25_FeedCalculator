@@ -8,6 +8,7 @@
 
         <text name="nxhm_row_intake" text="%s/Mon | %s übrig"/>
         <text name="nxhm_row_graze" text="%s/Mon | %s übrig"/>
+        <text name="nxhm_row_pasture" text="%s übrig"/>
         <text name="nxhm_row_yield"  text="%s/Mon"/>
 
         <text name="nxhm_span_both"     text="%dM %dT"/>

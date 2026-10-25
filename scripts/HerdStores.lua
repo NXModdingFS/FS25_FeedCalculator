@@ -241,6 +241,14 @@ function Stores.engineIntakePerHour(husbandry, intakeKey)
     return tonumber(spec[entry.field])
 end
 
+-- Whether this barn has the system at all. A pasture with no bedding should
+-- report no straw demand rather than the animals' theoretical appetite.
+function Stores.hasIntakeSystem(husbandry, intakeKey)
+    local entry = Stores.ENGINE_RATES[intakeKey]
+    if entry == nil then return true end
+    return Stores.specOf(husbandry, entry.spec) ~= nil
+end
+
 function Stores.engineFoodPerHour(husbandry)
     return Stores.engineIntakePerHour(husbandry, "food")
 end
@@ -286,24 +294,6 @@ function Stores.engineYieldPerHour(husbandry)
     end
 
     return rates
-end
-
--- Diagnostic: every number the food spec carries, so the field holding the
--- real consumption rate can be identified when litersPerHour is not it.
-function Stores.describeFoodSpec(husbandry)
-    local spec = Stores.specOf(husbandry, "spec_husbandryFood")
-    if spec == nil then return "no spec_husbandryFood" end
-
-    local parts = {}
-    for key, value in pairs(spec) do
-        if type(value) == "number" then
-            parts[#parts + 1] = string.format("%s=%g", tostring(key), value)
-        end
-    end
-    table.sort(parts)
-
-    if #parts == 0 then return "spec_husbandryFood carries no numbers" end
-    return table.concat(parts, " ")
 end
 
 -- Level of a single non-food input (water, straw) in litres, or nil if the
@@ -414,11 +404,19 @@ function Stores.classifyConditionRows(husbandry, infos)
                 end
             end
 
+            -- One spec can own several rows: the milk spec covers Milk and
+            -- Buffalo Milk, the pallet spec covers eggs and wool. Each row must
+            -- carry only its own fill type, or every row reports the sum.
             if hasFills then
                 for index in pairs(fills) do
                     local key = Stores.normaliseLabel(fillTypeTitle(index))
                     if key ~= "" and byTitle[key] == nil then
-                        byTitle[key] = descriptor
+                        byTitle[key] = {
+                            role      = source.role,
+                            intakeKey = source.intakeKey,
+                            specField = source.spec,
+                            fillTypes = { [index] = true },
+                        }
                     end
                 end
             end

@@ -11,6 +11,7 @@
         <!-- Condition rows -->
         <text name="nxhm_row_intake" text="%s/mo | %s left"/>
         <text name="nxhm_row_graze" text="%s/mo | %s left"/>
+        <text name="nxhm_row_pasture" text="%s left"/>
         <text name="nxhm_row_yield"  text="%s/mo"/>
 
         <!-- Time remaining -->

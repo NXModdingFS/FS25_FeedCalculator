@@ -295,11 +295,19 @@ function Demand.survey(husbandry)
     for _, key in ipairs(Demand.INTAKE_KEYS) do
         local perHour = Stores.engineIntakePerHour(husbandry, key)
 
-        if perHour ~= nil and perHour > 0 then
+        if perHour ~= nil then
+            -- Includes zero: the husbandry has the system and is drawing
+            -- nothing, which is a real answer.
             report.dailyIntake[key] = perHour * 24
             report.rateSource[key]  = "husbandry"
-        else
+        elseif Stores.hasIntakeSystem(husbandry, key) then
             report.rateSource[key]  = "curves"
+        else
+            -- No such system in this barn at all. An open pasture has no
+            -- bedding, so reporting an appetite for it from the curves would
+            -- be inventing a figure the barn can never consume.
+            report.dailyIntake[key] = 0
+            report.rateSource[key]  = "none"
         end
     end
 

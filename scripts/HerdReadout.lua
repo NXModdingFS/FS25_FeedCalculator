@@ -207,6 +207,101 @@ local function yieldSuffix(report, fillTypes, element)
     return string.format(phrase("nxhm_row_yield", "%s/mo"), volume(litres))
 end
 
+-- ------------------------------------------------------------
+--  Food section rows
+-- ------------------------------------------------------------
+-- The food group rows (TMR, Silage, Hay, Grass, Meadow) are built from a
+-- different pair of lists than the condition rows, and the field names are not
+-- documented. Rather than guess at them, the caption list is found by its
+-- contents: those rows are the only ones on the panel captioned "Name (NN%)".
+
+local function elementLists(frame)
+    local found = {}
+    for key, value in pairs(frame) do
+        if type(key) == "string" and type(value) == "table"
+           and type(value[1]) == "table" and type(value[1].setText) == "function" then
+            found[#found + 1] = value
+        end
+    end
+    return found
+end
+
+local function looksLikeFoodCaptions(list)
+    for _, element in ipairs(list) do
+        local text = baseTextOf(element)
+        if string.find(text, "%%%)%s*$") ~= nil then return true end
+    end
+    return false
+end
+
+-- The matching value list holds the litre figures, so it is the same length
+-- and its entries are numeric.
+local function matchingValueList(lists, captions)
+    for _, candidate in ipairs(lists) do
+        if candidate ~= captions and #candidate == #captions then
+            local numeric = 0
+            for _, element in ipairs(candidate) do
+                if string.find(baseTextOf(element), "%d") ~= nil then numeric = numeric + 1 end
+            end
+            if numeric == #candidate then return candidate end
+        end
+    end
+    return nil
+end
+
+-- The grazing row is captioned with the game's own meadow food label, so match
+-- on that rather than on anything we spell ourselves.
+local function findGrazingRow(captions, husbandry)
+    local label = nil
+    if g_i18n ~= nil and type(g_i18n.getText) == "function" then
+        local text = g_i18n:getText("animals_husbandryMeadowFood")
+        if type(text) == "string" and text ~= "" and text ~= "animals_husbandryMeadowFood" then
+            label = Stores.normaliseLabel(text)
+        end
+    end
+
+    if label ~= nil and label ~= "" then
+        for index, element in ipairs(captions) do
+            if string.find(Stores.normaliseLabel(baseTextOf(element)), label, 1, true) == 1 then
+                return index
+            end
+        end
+    end
+
+    return nil
+end
+
+local function decorateFoodRows(frame, husbandry, report)
+    local grass = Stores.pastureLiters(husbandry)
+    if grass <= 0 then return end
+
+    local daily = report.dailyIntake.food or 0
+    if daily <= 0 then return end
+
+    local lists = elementLists(frame)
+
+    local captions = nil
+    for _, list in ipairs(lists) do
+        if looksLikeFoodCaptions(list) then
+            captions = list
+            break
+        end
+    end
+    if captions == nil then return end
+
+    local index = findGrazingRow(captions, husbandry)
+    if index == nil then return end
+
+    local values = matchingValueList(lists, captions)
+    if values == nil then return end
+
+    -- The row already prints the standing litres, so the figure worth adding
+    -- is how long that grass alone would carry the herd.
+    appendToRow(values[index], string.format(
+        phrase("nxhm_row_pasture", "%s left"),
+        span(daysOfCover(grass, daily), report.daysInMonth, grass)))
+end
+
 local function decorateConditionRows(frame, husbandry, report)
     if type(frame.conditionValue) ~= "table" then return end
     if type(husbandry.getConditionInfos) ~= "function" then return end
@@ -266,6 +361,7 @@ function Readout.onHusbandryDisplayed(frame, husbandry)
     NXHerdMeter.cacheReport(target, report)
 
     decorateFeedRow(frame, target, report)
+    decorateFoodRows(frame, target, report)
     decorateConditionRows(frame, target, report)
 end
 
