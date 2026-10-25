@@ -129,6 +129,12 @@ end
 function Tuning:adopt(seasonScaled, trim)
     self.seasonScaled = seasonScaled == true
     self.trim = clampTrim(trim)
+
+    -- Every cached figure was derived from the old factor.
+    if type(NXHerdMeter.resurveyAll) == "function" then
+        NXHerdMeter.resurveyAll()
+    end
+
     notifyUi()
 end
 
@@ -207,19 +213,19 @@ local function senderIsAdmin(connection)
     if connection == nil then return g_server ~= nil end
 
     if type(connection.getIsMasterUser) == "function" then
-        local ok, value = pcall(connection.getIsMasterUser, connection)
-        if ok and type(value) == "boolean" then return value end
+        local value = connection:getIsMasterUser()
+        if type(value) == "boolean" then return value end
     end
     if connection.isMasterUser ~= nil then return connection.isMasterUser == true end
 
     local mission = g_currentMission
     local users = mission ~= nil and mission.userManager or nil
     if users ~= nil and type(users.getUserByConnection) == "function" then
-        local ok, user = pcall(users.getUserByConnection, users, connection)
-        if ok and type(user) == "table" then
+        local user = users:getUserByConnection(connection)
+        if type(user) == "table" then
             if type(user.getIsMasterUser) == "function" then
-                local ok2, value = pcall(user.getIsMasterUser, user)
-                if ok2 and type(value) == "boolean" then return value end
+                local value = user:getIsMasterUser()
+                if type(value) == "boolean" then return value end
             end
             if user.isMasterUser ~= nil then return user.isMasterUser == true end
         end

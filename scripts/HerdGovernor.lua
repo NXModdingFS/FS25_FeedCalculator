@@ -62,6 +62,7 @@ Governor.TARGETS = {
 }
 
 Governor.bound = {}
+Governor.pending = {}
 
 -- Returns the factor to apply, or nil when the settings leave vanilla
 -- behaviour alone and the stock code should simply run untouched.
@@ -138,6 +139,15 @@ function Governor:bind(target)
         local spec = type(placeable) == "table" and placeable[target.spec] or nil
         local factor = scalingFactor()
 
+        -- If an earlier call raised part way through, its scaled values are
+        -- still on that spec. Put them back before doing anything else, so a
+        -- fault elsewhere cannot leave throughput permanently multiplied.
+        local unfinished = Governor.pending[target.id]
+        if unfinished ~= nil then
+            Governor.pending[target.id] = nil
+            restoreRates(unfinished.spec, unfinished.undo)
+        end
+
         if spec == nil or placeable.isServer ~= true or factor == nil then
             return stock(placeable, superFunc, ...)
         end
@@ -147,14 +157,12 @@ function Governor:bind(target)
             return stock(placeable, superFunc, ...)
         end
 
-        -- The stock call must not be able to leave the spec scaled, so the
-        -- restore happens even if it raises.
-        local ok, a, b, c, d = pcall(stock, placeable, superFunc, ...)
-        restoreRates(spec, undo)
+        Governor.pending[target.id] = { spec = spec, undo = undo }
 
-        if not ok then
-            error(a, 0)
-        end
+        local a, b, c, d = stock(placeable, superFunc, ...)
+
+        Governor.pending[target.id] = nil
+        restoreRates(spec, undo)
 
         return a, b, c, d
     end
@@ -182,5 +190,5 @@ function Governor:reportUnbound()
     local missed = self:bindAll()
     if missed == nil then return end
 
-    Logging.warning("[NX FeedCalculator] throughput scaling unavailable for: %s", table.concat(missed, ", "))
+    Logging.warning("[Feed Calculator] throughput scaling unavailable for: %s", table.concat(missed, ", "))
 end

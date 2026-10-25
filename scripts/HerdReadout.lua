@@ -12,8 +12,8 @@ Readout.installed = false
 
 local function phrase(key, fallback)
     if g_i18n == nil or type(g_i18n.getText) ~= "function" then return fallback end
-    local ok, text = pcall(g_i18n.getText, g_i18n, key)
-    if ok and type(text) == "string" and text ~= "" and text ~= key then return text end
+    local text = g_i18n:getText(key)
+    if type(text) == "string" and text ~= "" and text ~= key then return text end
     return fallback
 end
 
@@ -21,8 +21,8 @@ Readout.phrase = phrase
 
 local function volume(litres)
     if g_i18n ~= nil and type(g_i18n.formatVolume) == "function" then
-        local ok, text = pcall(g_i18n.formatVolume, g_i18n, litres, 0)
-        if ok and type(text) == "string" and text ~= "" then return text end
+        local text = g_i18n:formatVolume(litres, 0)
+        if type(text) == "string" and text ~= "" then return text end
     end
     return string.format("%d l", math.floor((litres or 0) + 0.5))
 end
@@ -74,8 +74,10 @@ end
 -- The menu rewrites row text on every refresh, but a redraw can land twice in
 -- one frame; strip any suffix already added before appending a fresh one.
 local function baseTextOf(element)
-    local ok, text = pcall(element.getText, element)
-    if not ok or type(text) ~= "string" then return "" end
+    if type(element) ~= "table" or type(element.getText) ~= "function" then return "" end
+
+    local text = element:getText()
+    if type(text) ~= "string" then return "" end
 
     local mark = joiner()
     local cut = string.find(text, mark, 1, true)
@@ -92,7 +94,7 @@ local function appendToRow(element, suffix)
 
     local base = baseTextOf(element)
     local composed = base ~= "" and (base .. joiner() .. suffix) or suffix
-    pcall(element.setText, element, composed)
+    element:setText(composed)
 end
 
 -- Fallback level reader for rows whose specialisation we could not query.
@@ -150,7 +152,7 @@ local function decorateFeedRow(frame, husbandry, report)
         volume(monthly), volume(stocked), cover)
 
     if type(frame.foodRowTotalValue) == "table" and type(frame.foodRowTotalValue.setText) == "function" then
-        pcall(frame.foodRowTotalValue.setText, frame.foodRowTotalValue, line)
+        frame.foodRowTotalValue:setText(line)
     end
 
     -- The stock game splits the same information across two more labels; with
@@ -158,7 +160,7 @@ local function decorateFeedRow(frame, husbandry, report)
     for _, field in ipairs({ "foodRowValue", "foodRowFillLevelValue" }) do
         local element = frame[field]
         if type(element) == "table" and type(element.setText) == "function" then
-            pcall(element.setText, element, "")
+            element:setText("")
         end
     end
 end
@@ -209,8 +211,8 @@ local function decorateConditionRows(frame, husbandry, report)
     if type(frame.conditionValue) ~= "table" then return end
     if type(husbandry.getConditionInfos) ~= "function" then return end
 
-    local ok, infos = pcall(husbandry.getConditionInfos, husbandry)
-    if not ok or type(infos) ~= "table" then return end
+    local infos = husbandry:getConditionInfos()
+    if type(infos) ~= "table" then return end
 
     local rows = Stores.classifyConditionRows(husbandry, infos)
 
@@ -252,7 +254,7 @@ local function resolveHusbandry(frame, supplied)
         if frame[field] ~= nil then return frame[field] end
     end
 
-    return Stores.tryCall(frame, "getDisplayedHusbandry")
+    return Stores.invoke(frame, "getDisplayedHusbandry")
 end
 
 function Readout.onHusbandryDisplayed(frame, husbandry)
@@ -274,13 +276,7 @@ function Readout:install()
 
     InGameMenuAnimalsFrame.updateHusbandryDisplay = Utils.appendedFunction(
         InGameMenuAnimalsFrame.updateHusbandryDisplay,
-        function(frame, husbandry)
-            -- A menu redraw must never be able to take the game down.
-            local ok, err = pcall(Readout.onHusbandryDisplayed, frame, husbandry)
-            if not ok then
-                Logging.warning("[NX FeedCalculator] readout failed: %s", tostring(err))
-            end
-        end)
+        Readout.onHusbandryDisplayed)
 
     self.installed = true
 end

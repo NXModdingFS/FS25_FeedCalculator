@@ -103,8 +103,7 @@ end
 
 function NXHerdMeter.resurvey(husbandry)
     if husbandry == nil then return end
-    local ok, report = pcall(Demand.survey, husbandry)
-    if ok then NXHerdMeter.cacheReport(husbandry, report) end
+    NXHerdMeter.cacheReport(husbandry, Demand.survey(husbandry))
 end
 
 function NXHerdMeter.resurveyAll()
@@ -129,17 +128,20 @@ end
 -- ------------------------------------------------------------
 
 function NXHerdMeter.consoleReport()
-    local lines = { "NX FeedCalculator: " .. NXHerdMeter.Tuning:describe() }
+    local lines = { "Feed Calculator: " .. NXHerdMeter.Tuning:describe() }
     local seen = 0
 
     NXHerdMeter.eachHusbandry(function(placeable)
         local report = Demand.survey(placeable)
-        if report.head <= 0 then return end
+        local daily = report.dailyIntake.food or 0
+
+        -- Head count can be zero when an animal mod keeps its records out of
+        -- reach; a published rate still makes the barn worth reporting.
+        if report.head <= 0 and daily <= 0 then return end
 
         seen = seen + 1
 
         local trough, grazing = Stores.feedOnHand(placeable)
-        local daily = report.dailyIntake.food or 0
         local perMonth = function(key) return (report.dailyIntake[key] or 0) * report.daysInMonth end
 
         lines[#lines + 1] = string.format(
@@ -147,16 +149,16 @@ function NXHerdMeter.consoleReport()
             seen, report.head, daily, perMonth("food"), trough, grazing,
             report.dailyIntake.water or 0, report.dailyIntake.straw or 0)
 
-        -- Cross-check the curve figure against the rate the game will really
-        -- use. A wide gap means the curves are being read wrong.
+        lines[#lines + 1] = string.format(
+            "        rate source: food=%s water=%s straw=%s yields=%s  intensity %.3f",
+            report.rateSource.food or "?", report.rateSource.water or "?",
+            report.rateSource.straw or "?", report.rateSource.yields or "?",
+            report.intensity or 1)
+
+        -- When the husbandry publishes a rate, show what the curves alone would
+        -- have said. A wide gap means an animal mod is changing intake.
         local enginePerHour = Stores.engineFoodPerHour(placeable)
-        if enginePerHour ~= nil then
-            local engineDaily = enginePerHour * 24
-            local drift = daily > 0 and ((engineDaily - daily) / daily * 100) or 0
-            lines[#lines + 1] = string.format(
-                "        engine %.0f l/day (%.2f l/h) vs curves %.0f l/day  ->  %+.1f%%",
-                engineDaily, enginePerHour, daily, drift)
-        else
+        if enginePerHour == nil or enginePerHour <= 0 then
             lines[#lines + 1] = "        food spec: " .. Stores.describeFoodSpec(placeable)
         end
 
@@ -213,8 +215,13 @@ Mission00.loadMission00Finished = Utils.appendedFunction(Mission00.loadMission00
         table.insert(g_currentMission.updateables, NXHerdMeter)
     end
 
-    addConsoleCommand("nxFeedReport", "Print feed demand and grazing cover for every husbandry",
-        "consoleReport", NXHerdMeter)
+    -- Loading a second savegame in one session runs this again; registering
+    -- the same command twice logs a warning.
+    if not NXHerdMeter.commandRegistered then
+        NXHerdMeter.commandRegistered = true
+        addConsoleCommand("nxFeedReport", "Print feed demand and grazing cover for every husbandry",
+            "consoleReport", NXHerdMeter)
+    end
 end)
 
 if FSBaseMission ~= nil and type(FSBaseMission.saveSavegame) == "function" then

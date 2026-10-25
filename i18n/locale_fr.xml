@@ -17,7 +17,7 @@
         <text name="nxhm_span_trace"    text="&lt;1j"/>
         <text name="nxhm_span_empty"    text="vide"/>
 
-        <text name="nxhm_opt_section"     text="NX Calculateur d'Alimentation"/>
+        <text name="nxhm_opt_section"     text="Calculateur d'Alimentation"/>
         <text name="nxhm_opt_season"      text="Lier la consommation à la durée du mois"/>
         <text name="nxhm_opt_season_help" text="Multiplie la consommation de l'élevage par le nombre de jours d'un mois de jeu. Un mois plus long coûte donc proportionnellement plus de nourriture, d'eau et de litière."/>
         <text name="nxhm_opt_trim"        text="Multiplicateur de consommation"/>

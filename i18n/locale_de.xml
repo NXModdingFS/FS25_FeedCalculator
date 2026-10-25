@@ -17,7 +17,7 @@
         <text name="nxhm_span_trace"    text="&lt;1T"/>
         <text name="nxhm_span_empty"    text="leer"/>
 
-        <text name="nxhm_opt_section"     text="NX FutterRechner"/>
+        <text name="nxhm_opt_section"     text="Futterrechner"/>
         <text name="nxhm_opt_season"      text="Verbrauch an Monatslänge koppeln"/>
         <text name="nxhm_opt_season_help" text="Multipliziert den Stallverbrauch mit der Anzahl Tage eines Spielmonats. Ein längerer Monat kostet damit anteilig mehr Futter, Wasser und Einstreu."/>
         <text name="nxhm_opt_trim"        text="Verbrauchsmultiplikator"/>

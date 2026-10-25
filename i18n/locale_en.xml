@@ -22,7 +22,7 @@
         <text name="nxhm_span_empty"    text="empty"/>
 
         <!-- Settings -->
-        <text name="nxhm_opt_section"     text="NX FeedCalculator"/>
+        <text name="nxhm_opt_section"     text="Feed Calculator"/>
         <text name="nxhm_opt_season"      text="Scale feed use to month length"/>
         <text name="nxhm_opt_season_help" text="Multiplies husbandry throughput by the number of days in an in-game month, so a longer month costs proportionally more feed, water and bedding."/>
         <text name="nxhm_opt_trim"        text="Feed use multiplier"/>

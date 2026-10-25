@@ -31,8 +31,8 @@ local function sampleCurve(curve, atIndex)
     if type(curve) ~= "table" then return 0 end
 
     if type(curve.get) == "function" then
-        local ok, value = pcall(curve.get, curve, atIndex)
-        if ok and type(value) == "number" then return value end
+        local value = curve:get(atIndex)
+        if type(value) == "number" then return value end
     end
 
     local direct = curve[atIndex]
@@ -49,14 +49,14 @@ end
 
 function Demand.headCount(cluster)
     if type(cluster) ~= "table" then return 0 end
-    local viaGetter = Stores.tryCall(cluster, "getNumAnimals")
+    local viaGetter = Stores.invoke(cluster, "getNumAnimals")
     if type(viaGetter) == "number" then return viaGetter end
     return numberFrom(cluster.numAnimals, 0)
 end
 
 function Demand.ageOf(cluster)
     if type(cluster) ~= "table" then return 0 end
-    local viaGetter = Stores.tryCall(cluster, "getAge")
+    local viaGetter = Stores.invoke(cluster, "getAge")
     if type(viaGetter) == "number" then return viaGetter end
     return numberFrom(cluster.age, 0)
 end
@@ -109,18 +109,15 @@ end
 function Demand.foodModifierScalar(cluster, subType)
     local scalar = 1
     for _, modifier in ipairs(Demand.foodModifiers) do
-        local ok, value = pcall(modifier.resolve, cluster, subType)
-        if ok then
-            local numeric = numberFrom(value, 1)
-            if numeric > 0 then scalar = scalar * numeric end
-        end
+        local numeric = numberFrom(modifier.resolve(cluster, subType), 1)
+        if numeric > 0 then scalar = scalar * numeric end
     end
     return scalar
 end
 
 -- Can this cluster be at a point in its cycle where it would be lactating?
 local function isBreedingAge(cluster, subType)
-    local viaGetter = Stores.tryCall(cluster, "getCanReproduce")
+    local viaGetter = Stores.invoke(cluster, "getCanReproduce")
     if type(viaGetter) == "boolean" then return viaGetter end
 
     if subType ~= nil and subType.supportsReproduction == true then
@@ -185,7 +182,7 @@ function Demand.resolveOutputFillType(definition, outputKey)
     end
 
     if g_fillTypeManager ~= nil and type(outputKey) == "string" then
-        local index = Stores.tryCall(g_fillTypeManager, "getFillTypeIndexByName", string.upper(outputKey))
+        local index = Stores.invoke(g_fillTypeManager, "getFillTypeIndexByName", string.upper(outputKey))
         if type(index) == "number" then return index end
     end
 
@@ -219,10 +216,22 @@ end
 
 local function describeFillType(fillTypeIndex, fallbackName)
     if fillTypeIndex ~= nil and g_fillTypeManager ~= nil then
-        local title = Stores.tryCall(g_fillTypeManager, "getFillTypeTitleByIndex", fillTypeIndex)
+        local title = Stores.invoke(g_fillTypeManager, "getFillTypeTitleByIndex", fillTypeIndex)
         if type(title) == "string" and title ~= "" then return title end
     end
     return tostring(fallbackName)
+end
+
+-- The governor multiplies the rate the game actually draws per hour. The age
+-- curves know nothing about that, so the same factor has to be applied here
+-- or the panel would keep reporting the unscaled figure.
+local function tunedFactor()
+    local tuning = NXHerdMeter.Tuning
+    if tuning == nil or type(tuning.intensity) ~= "function" then return 1 end
+
+    local factor = tonumber(tuning:intensity())
+    if factor == nil or factor ~= factor or factor <= 0 then return 1 end
+    return factor
 end
 
 -- One pass over every cluster in the barn. Returns daily litres for each
@@ -231,7 +240,9 @@ function Demand.survey(husbandry)
     local report = {
         head        = 0,
         daysInMonth = Demand.monthLengthInDays(),
+        intensity   = tunedFactor(),
         dailyIntake = {},
+        rateSource  = {},
         yields      = {},
     }
 
@@ -239,8 +250,11 @@ function Demand.survey(husbandry)
         report.dailyIntake[key] = 0
     end
 
-    local herd = Stores.herdOf(husbandry)
-    if herd == nil then return report end
+    -- The curve walk is skipped when the herd cannot be read -- an animal
+    -- overhaul mod may keep its records somewhere we do not know about -- but
+    -- the published rates below are read either way, so the barn still reports
+    -- correctly rather than showing zeroes.
+    local herd = Stores.herdOf(husbandry) or {}
 
     for _, cluster in ipairs(herd) do
         local head = Demand.headCount(cluster)
@@ -272,6 +286,56 @@ function Demand.survey(husbandry)
                     end
                 end
             end
+        end
+    end
+
+    -- The curve walk above is the fallback. If the husbandry is publishing its
+    -- own rate, that already accounts for whatever the loaded animal mods do to
+    -- per-animal intake, so it wins.
+    for _, key in ipairs(Demand.INTAKE_KEYS) do
+        local perHour = Stores.engineIntakePerHour(husbandry, key)
+
+        if perHour ~= nil and perHour > 0 then
+            report.dailyIntake[key] = perHour * 24
+            report.rateSource[key]  = "husbandry"
+        else
+            report.rateSource[key]  = "curves"
+        end
+    end
+
+    -- Produced goods, same rule as intake: a published rate beats the curves.
+    local published = Stores.engineYieldPerHour(husbandry)
+    if published ~= nil then
+        for fillTypeIndex, perHour in pairs(published) do
+            local bucket = report.yields[fillTypeIndex]
+
+            if bucket == nil then
+                bucket = {
+                    perDay     = 0,
+                    fillType   = fillTypeIndex,
+                    outputName = nil,
+                    title      = describeFillType(fillTypeIndex, "output"),
+                }
+                report.yields[fillTypeIndex] = bucket
+            end
+
+            bucket.perDay = perHour * 24
+            report.rateSource.yields = "husbandry"
+        end
+    end
+
+    if report.rateSource.yields == nil then
+        report.rateSource.yields = "curves"
+    end
+
+    -- Applied once at the end so every figure in the report is what the barn
+    -- will really get through, not what the curves say in isolation.
+    if report.intensity ~= 1 then
+        for key, litres in pairs(report.dailyIntake) do
+            report.dailyIntake[key] = litres * report.intensity
+        end
+        for _, bucket in pairs(report.yields) do
+            bucket.perDay = bucket.perDay * report.intensity
         end
     end
 

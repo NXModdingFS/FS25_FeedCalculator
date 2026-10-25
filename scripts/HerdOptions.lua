@@ -80,8 +80,8 @@ local function playerMayEdit(frame)
     local mission = g_currentMission
     if mission ~= nil then
         if type(mission.getIsClientMasterUser) == "function" then
-            local ok, value = pcall(mission.getIsClientMasterUser, mission)
-            if ok and type(value) == "boolean" then return value end
+            local value = mission:getIsClientMasterUser()
+            if type(value) == "boolean" then return value end
         end
         if mission.isClientMasterUser ~= nil then return mission.isClientMasterUser == true end
     end
@@ -99,6 +99,19 @@ local function looksLikeOption(element)
         and type(element.setState) == "function"
 end
 
+-- A clone inherits the template's visibility. On a multiplayer client the game
+-- hides the settings only the host may change, and those rows stay in the
+-- layout, so cloning one produces a control that is built correctly and never
+-- drawn. Only ever copy a row that is currently on screen.
+local function isOnScreen(element)
+    if type(element) ~= "table" then return false end
+    if element.visible == false then return false end
+    if type(element.getIsVisible) == "function" and element:getIsVisible() == false then
+        return false
+    end
+    return true
+end
+
 -- Clone an option box that already exists on the page. A box carrying several
 -- values is preferred: a two state checkbox styles the multiplier ramp badly.
 local function findTemplate(layout)
@@ -108,10 +121,10 @@ local function findTemplate(layout)
 
     for _, container in ipairs(layout.elements) do
         if type(container) == "table" and type(container.elements) == "table"
-           and type(container.clone) == "function" then
+           and type(container.clone) == "function" and isOnScreen(container) then
 
             local option = container.elements[1]
-            if looksLikeOption(option) then
+            if looksLikeOption(option) and isOnScreen(option) then
                 if type(option.texts) == "table" and #option.texts > 2 then
                     return container
                 end
@@ -149,6 +162,22 @@ local function findTooltip(option)
     return nil
 end
 
+-- nil when the running game build has no such profile, which loadProfile
+-- cannot be handed.
+local function guiProfile(name)
+    if g_gui == nil or type(g_gui.getProfile) ~= "function" then return nil end
+    return g_gui:getProfile(name)
+end
+
+local function showElement(element)
+    if type(element) ~= "table" then return end
+    if type(element.setVisible) == "function" then
+        element:setVisible(true)
+    else
+        element.visible = true
+    end
+end
+
 local function reserveFocus(element)
     if type(element) ~= "table" then return end
     if FocusManager ~= nil and type(FocusManager.serveAutoFocusId) == "function" then
@@ -172,6 +201,11 @@ local function buildFromTemplate(frame, template, descriptor)
     option.target = Options
     option:setCallback("onClickCallback", descriptor.callback)
 
+    -- Never inherit the template's own visibility or disabled state.
+    showElement(container)
+    showElement(option)
+    if type(option.setDisabled) == "function" then option:setDisabled(false) end
+
     local caption = findCaption(container)
     if caption ~= nil then caption:setText(descriptor.title()) end
 
@@ -189,23 +223,31 @@ end
 -- Used when the page has no clonable option, for instance if a UI overhaul
 -- mod replaced the settings layout wholesale.
 local function buildFromProfiles(frame, descriptor)
-    if g_gui == nil or type(g_gui.getProfile) ~= "function" then return nil end
+    local boxStyle     = guiProfile("fs25_multiTextOptionContainer")
+    local optionStyle  = guiProfile("fs25_settingsMultiTextOption")
+    local captionStyle = guiProfile("fs25_settingsMultiTextOptionTitle")
+    local tooltipStyle = guiProfile("fs25_multiTextOptionTooltip")
+
+    -- loadProfile raises on a nil profile, so check all four up front.
+    if boxStyle == nil or optionStyle == nil or captionStyle == nil or tooltipStyle == nil then
+        return nil
+    end
 
     local container = BitmapElement.new()
-    container:loadProfile(g_gui:getProfile("fs25_multiTextOptionContainer"), true)
+    container:loadProfile(boxStyle, true)
 
     local option = MultiTextOptionElement.new()
-    option:loadProfile(g_gui:getProfile("fs25_settingsMultiTextOption"), true)
+    option:loadProfile(optionStyle, true)
     option.target = Options
     option:setCallback("onClickCallback", descriptor.callback)
 
     local caption = TextElement.new()
-    caption:loadProfile(g_gui:getProfile("fs25_settingsMultiTextOptionTitle"), true)
+    caption:loadProfile(captionStyle, true)
     caption:setText(descriptor.title())
 
     local tooltip = TextElement.new()
     tooltip.name = "ignore"
-    tooltip:loadProfile(g_gui:getProfile("fs25_multiTextOptionTooltip"), true)
+    tooltip:loadProfile(tooltipStyle, true)
     tooltip:setText(descriptor.help())
 
     option:addElement(tooltip)
@@ -228,14 +270,17 @@ local function buildFromProfiles(frame, descriptor)
 end
 
 local function addHeading(frame)
-    if g_gui == nil or type(g_gui.getProfile) ~= "function" then return end
+    local headingStyle = guiProfile("fs25_settingsSectionHeader")
+    if headingStyle == nil then return nil end
 
     local heading = TextElement.new()
     heading.name = "sectionHeader"
-    heading:loadProfile(g_gui:getProfile("fs25_settingsSectionHeader"), true)
-    heading:setText(text("nxhm_opt_section", "NX FeedCalculator"))
+    heading:loadProfile(headingStyle, true)
+    heading:setText(text("nxhm_opt_section", "Feed Calculator"))
     frame.gameSettingsLayout:addElement(heading)
     heading:onGuiSetupFinished()
+
+    return heading
 end
 
 -- ------------------------------------------------------------
@@ -246,9 +291,10 @@ function Options:attach(frame)
     if type(frame) ~= "table" or type(frame.gameSettingsLayout) ~= "table" then return end
 
     if not frame.nxhmAttached then
-        addHeading(frame)
+        local heading = addHeading(frame)
 
         local template = findTemplate(frame.gameSettingsLayout)
+        local built = 0
 
         for _, descriptor in ipairs(self.CONTROLS) do
             local option = nil
@@ -259,6 +305,18 @@ function Options:attach(frame)
                 option = buildFromProfiles(frame, descriptor)
             end
             frame[descriptor.field] = option
+            if option ~= nil then built = built + 1 end
+        end
+
+        -- A heading on its own tells the player nothing except that something
+        -- is broken, so withdraw it and say why in the log instead.
+        if built == 0 then
+            if heading ~= nil and type(heading.setVisible) == "function" then
+                heading:setVisible(false)
+            end
+            Logging.warning(
+                "[Feed Calculator] settings controls could not be built (clone template %s); the section has been hidden",
+                template ~= nil and "was found" or "was not found")
         end
 
         frame.gameSettingsLayout:invalidateLayout()
@@ -275,6 +333,8 @@ end
 
 function Options:refresh(frame)
     if type(frame) ~= "table" or not frame.nxhmAttached then return end
+    -- A frame from a closed menu can have lost its layout; nothing to redraw.
+    if type(frame.gameSettingsLayout) ~= "table" then return end
 
     local mayEdit = playerMayEdit(frame)
 
@@ -299,7 +359,7 @@ end
 -- server pushes new values to a client.
 function Options:refreshOpenPage()
     for _, frame in ipairs(self.pages) do
-        pcall(self.refresh, self, frame)
+        self:refresh(frame)
     end
 end
 
@@ -338,11 +398,11 @@ function Options:install()
 
     InGameMenuSettingsFrame.onFrameOpen = Utils.appendedFunction(
         InGameMenuSettingsFrame.onFrameOpen,
-        function(frame) pcall(Options.attach, Options, frame) end)
+        function(frame) Options:attach(frame) end)
 
     InGameMenuSettingsFrame.updateGameSettings = Utils.appendedFunction(
         InGameMenuSettingsFrame.updateGameSettings,
-        function(frame) pcall(Options.refresh, Options, frame) end)
+        function(frame) Options:refresh(frame) end)
 
     self.bound = true
 end

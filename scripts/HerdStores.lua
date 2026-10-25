@@ -20,16 +20,18 @@ Stores.SPEC_TAGS = {
     { spec = "spec_husbandryPallets",      tag = "pallet" },
 }
 
-local function tryCall(holder, methodName, ...)
+-- Calls a method only when the object actually has one, which is the normal
+-- case here: husbandry specialisations differ by animal type and by which
+-- animal mods are loaded. A missing method returns nil; a method that raises
+-- is a real fault and is left to surface in the log.
+local function invoke(holder, methodName, ...)
     if type(holder) ~= "table" then return nil end
     local fn = holder[methodName]
     if type(fn) ~= "function" then return nil end
-    local ok, result = pcall(fn, holder, ...)
-    if ok then return result end
-    return nil
+    return fn(holder, ...)
 end
 
-Stores.tryCall = tryCall
+Stores.invoke = invoke
 
 -- A husbandry reference can arrive as the placeable itself, as the animals
 -- spec table, or as a module handle. Everything downstream wants the placeable,
@@ -71,12 +73,12 @@ function Stores.herdOf(husbandry)
         husbandry,
         husbandry.spec_husbandryAnimals,
         placeable ~= nil and placeable.spec_husbandryAnimals or nil,
-        tryCall(husbandry, "getModuleByName", "husbandryAnimals"),
+        invoke(husbandry, "getModuleByName", "husbandryAnimals"),
     }
 
     for _, holder in pairs(candidates) do
         if type(holder) == "table" then
-            local list = tryCall(holder, "getClusters")
+            local list = invoke(holder, "getClusters")
             if type(list) == "table" then return list end
             if type(holder.clusters) == "table" then return holder.clusters end
         end
@@ -145,14 +147,14 @@ local function sumViaFoodGroups(placeable, animalTypeIndex)
     if foodSystem == nil or animalTypeIndex == nil then return nil end
     if type(placeable.getAvailableFood) ~= "function" then return nil end
 
-    local recipe = tryCall(foodSystem, "getAnimalFood", animalTypeIndex)
+    local recipe = invoke(foodSystem, "getAnimalFood", animalTypeIndex)
     if type(recipe) ~= "table" or type(recipe.groups) ~= "table" then return nil end
 
     local total, counted = 0, false
     for _, group in pairs(recipe.groups) do
         if type(group) == "table" and type(group.fillTypes) == "table" then
             for _, fillTypeIndex in pairs(group.fillTypes) do
-                local available = tryCall(placeable, "getAvailableFood", fillTypeIndex)
+                local available = invoke(placeable, "getAvailableFood", fillTypeIndex)
                 if type(available) == "number" and available > 0 then
                     total = total + available
                     counted = true
@@ -212,13 +214,78 @@ function Stores.feedOnHand(husbandry)
     return trough, grazing, trough + grazing
 end
 
--- What the game itself will actually draw per in-game hour for the whole barn.
--- Independent of the age curves, so it doubles as a check on them.
-function Stores.engineFoodPerHour(husbandry)
-    local spec = Stores.specOf(husbandry, "spec_husbandryFood")
+-- The husbandry keeps its own standing rate per in-game hour for each input.
+-- Vanilla fills these from the same age curves, so reading them changes
+-- nothing on a stock game. Animal overhaul mods replace the cluster model and
+-- rebuild these fields from per-animal figures the curves cannot reproduce --
+-- Realistic Livestock multiplies the curve by 1.25 when lactating, by a
+-- pregnancy factor, by the animal's genetic metabolism and by its own food
+-- scale, then stores the result per hour. Reading the published rate is
+-- therefore right on vanilla and right under those mods, with no detection.
+--
+-- All three fields below are per in-game HOUR, so a day is x24.
+Stores.ENGINE_RATES = {
+    food  = { spec = "spec_husbandryFood",  field = "litersPerHour"      },
+    water = { spec = "spec_husbandryWater", field = "litersPerHour"      },
+    straw = { spec = "spec_husbandryStraw", field = "inputLitersPerHour" },
+}
+
+function Stores.engineIntakePerHour(husbandry, intakeKey)
+    local entry = Stores.ENGINE_RATES[intakeKey]
+    if entry == nil then return nil end
+
+    local spec = Stores.specOf(husbandry, entry.spec)
     if spec == nil then return nil end
-    -- A zero is meaningful (herd not feeding), so only a missing field is nil.
-    return tonumber(spec.litersPerHour)
+
+    -- A zero is meaningful (nothing being drawn), so only a missing field is nil.
+    return tonumber(spec[entry.field])
+end
+
+function Stores.engineFoodPerHour(husbandry)
+    return Stores.engineIntakePerHour(husbandry, "food")
+end
+
+-- The same idea for produced goods. Milk and pallets keep a rate per fill type
+-- in a table; manure and slurry keep a single rate plus the fill type it lands
+-- in. Realistic Livestock rebuilds the manure rate from per-animal output, and
+-- waste and wool mods rewrite these fields too, so the published rate is the
+-- only figure that reflects whatever is actually loaded.
+Stores.ENGINE_YIELDS = {
+    { spec = "spec_husbandryStraw",        rate = "outputLitersPerHour", fill = "outputFillType" },
+    { spec = "spec_husbandryLiquidManure", rate = "litersPerHour",       fill = "fillType"       },
+    { spec = "spec_husbandryMilk",         rate = "litersPerHour",       perFillType = true      },
+    { spec = "spec_husbandryPallets",      rate = "litersPerHour",       perFillType = true      },
+}
+
+-- Returns { [fillTypeIndex] = litresPerHour }, or nil when nothing published.
+function Stores.engineYieldPerHour(husbandry)
+    local rates = nil
+
+    local function add(fillTypeIndex, litres)
+        local amount = tonumber(litres)
+        if fillTypeIndex == nil or amount == nil or amount <= 0 then return end
+        rates = rates or {}
+        rates[fillTypeIndex] = (rates[fillTypeIndex] or 0) + amount
+    end
+
+    for _, entry in ipairs(Stores.ENGINE_YIELDS) do
+        local spec = Stores.specOf(husbandry, entry.spec)
+        if spec ~= nil then
+            local value = spec[entry.rate]
+
+            if entry.perFillType then
+                if type(value) == "table" then
+                    for fillTypeIndex, litres in pairs(value) do
+                        add(fillTypeIndex, litres)
+                    end
+                end
+            else
+                add(spec[entry.fill], value)
+            end
+        end
+    end
+
+    return rates
 end
 
 -- Diagnostic: every number the food spec carries, so the field holding the
@@ -247,7 +314,7 @@ function Stores.inputLiters(husbandry, specField)
     if placeable == nil or spec == nil then return nil end
 
     if spec.fillType ~= nil then
-        local level = tryCall(placeable, "getHusbandryFillLevel", spec.fillType)
+        local level = invoke(placeable, "getHusbandryFillLevel", spec.fillType)
         if type(level) == "number" then return level end
     end
 
@@ -316,7 +383,7 @@ end
 
 local function fillTypeTitle(index)
     if g_fillTypeManager == nil then return nil end
-    local title = tryCall(g_fillTypeManager, "getFillTypeTitleByIndex", index)
+    local title = invoke(g_fillTypeManager, "getFillTypeTitleByIndex", index)
     if type(title) == "string" and title ~= "" then return title end
     return nil
 end

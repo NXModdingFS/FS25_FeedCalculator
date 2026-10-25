@@ -1,3 +1,7 @@
+# Feed Calculator
+
+Shows what your animals actually eat, and how long what you have will last — built into the vanilla Animals menu, with no extra screens to open.
+
 > [!IMPORTANT]
 > ModHub Download: https://www.farming-simulator.com/mod.php?mod_id=343747 The latest features will always be avaliable on my GitHub however, if you'd prefer to use the ModHub version to recieve update notifications in game feel free.
 
@@ -6,42 +10,59 @@
 - Review #1: https://www.youtube.com/watch?v=UIglYTRvHrs Thank you Gilgamoth
 - Review #2: https://youtu.be/4Xi4RTSKB6A?si=-uJphTqei7f9yhST Thank you Welsh Sim Farmer
 
-:star2:<ins>**Features Section:**</ins>:star2: 
+:star2:<ins>**Features Section:**</ins>:star2:
 
-**Automatic feed consumption calculation**
+**Feed consumption, worked out for you**
 
-• Calculates monthly feed consumption
+• Monthly feed, water and bedding demand for every husbandry
 
-• Works per-husbandry and per-animal cluster (Breed Types)
+• Time remaining on each row, so you know when to top up before it runs dry
 
-• Fully based on true animal husbandry data (age, sub-type, input curves, lactation…)
+• Shown directly in the in-game Animals menu — no extra window, no overlay
 
-**Integrated UI Display**
+**Meadow grass is counted too**
 
-• Shows Monthly consumption, and Time Remaining
+• Barns with a pasture include the standing grass in the feed total
 
-• Integrated directly into the in game Animals Menu
+• The grazing row shows how long the pasture alone would carry the herd
 
-**Supports all animal types**
+**Reads the figures the game itself uses**
+
+• Demand and output are taken from the rate each husbandry publishes, falling back to the animal age curves only when there isn't one
+
+• That means other animal mods are respected automatically, with nothing to switch on
+
+**Animal mod compatibility**
 
 • Vanilla FS25 animals
 
-• Supports multiple husbandry's (e.g., same or different type)
+• Realistic Livestock — per-animal lactation, pregnancy and genetics are reflected, because the figures come from the rate Realistic Livestock itself maintains
 
-**Enhanced Animals System Compatible**
+• Enhanced Animal System — lactation curves are read per month from the sub type
 
-• Automatically accounts for EAS lactation & production modifiers
+• Any number of husbandries, of the same or different types
 
-• Integrates seamlessly into the Enhanced Animal Systems mod
+**Optional consumption scaling**
 
-• Integrates seamlessly into the Realistic Livestock mod
+Two independent settings under **Settings → Game**:
 
-**Multiplayer Supported**
+• *Scale feed use to month length* — ties husbandry throughput to the number of days in an in-game month
 
-• Safe for dedicated servers (Multiplayer compatible)
+• *Feed use multiplier* — a straight multiplier on feed, water, bedding and produce
 
+Both are off by default, so the game behaves exactly as vanilla until you change them.
 
-• Recalculates asynchronously to take account of changes in animal numbers
+**Multiplayer supported**
+
+• Dedicated server safe — throughput is simulated on the host and replicated
+
+• Settings save per savegame and sync to joining clients
+
+• Only the host or an admin can change them; everyone else sees them read-only
+
+**Troubleshooting**
+
+Run `nxFeedReport` in the console for a per-husbandry breakdown: herd size, daily and monthly demand, trough and pasture stock, grazing cover, and which source each figure came from. Useful to attach to a bug report.
 
 > [!NOTE]
 > Edits of this mod file are not permitted.
